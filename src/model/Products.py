@@ -10,9 +10,8 @@ class Product(SQLModel, table=True):
     __tablename__ = "products"
 
     uid: uuid.UUID = Field(
-        sa_column=Column(
-            pg.UUID, primary_key=True, unique=True, nullable=False, default=uuid.UUID
-        )
+        default_factory=uuid.uuid4,
+        sa_column=Column(pg.UUID, primary_key=True, unique=True, nullable=False),
     )
     name: str = Field(sa_column=Column(pg.VARCHAR(100), default="Name Products"))
     code: str = Field(sa_column=Column(pg.VARCHAR(50), nullable=False))
@@ -20,7 +19,7 @@ class Product(SQLModel, table=True):
     price: float = Field(default=0)
     min_price: float = Field(default=0)
     stock: int = Field(default=0)
-    lowstock: int = Field(default=0)
+    lowstock: int = Field(default=5)
 
     spess: Optional[dict] = Field(sa_column=Column(pg.JSON, default=None))
 
@@ -39,7 +38,7 @@ class Product(SQLModel, table=True):
     category: Optional["ProductCategory"] = Relationship(back_populates="products")
     Images: List["ProductImage"] = Relationship(
         back_populates="product",
-        sa_relationship_args={"cascade": "all, delete-orphan"},
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
 
 
@@ -47,9 +46,8 @@ class ProductCategory(SQLModel, table=True):
     __tablename__ = "product_categories"
 
     uid: uuid.UUID = Field(
-        sa_column=Column(
-            pg.UUID, primary_key=True, unique=True, nullable=False, default=uuid.UUID
-        )
+        default_factory=uuid.uuid4,
+        sa_column=Column(pg.UUID, primary_key=True, unique=True, nullable=False),
     )
 
     name: str = Field(sa_column=Column(pg.VARCHAR(100), nullable=False))
@@ -68,12 +66,11 @@ class ProductImage(SQLModel, table=True):
     __tablename__ = "product_images"
 
     uid: uuid.UUID = Field(
-        sa_column=Column(
-            pg.UUID, primary_key=True, unique=True, nullable=False, default=uuid.UUID
-        )
+        default_factory=uuid.uuid4,
+        sa_column=Column(pg.UUID, primary_key=True, unique=True, nullable=False),
     )
 
-    product_uid: uuid.UUID = Field(nullable=Field, foreign_key="products.uid")
+    product_uid: uuid.UUID = Field(nullable=False, foreign_key="products.uid")
 
     main_image: str = Field(default=None)
     image_url: str = Field(default=None)
