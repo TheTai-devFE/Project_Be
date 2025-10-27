@@ -3,7 +3,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 from .config import Config
-from src.model.Products import Product, ProductCategory, ProductImage
+from src.model.Products import Product, ProductCategory
 
 async_engine = create_async_engine(url=Config.DATABASE_URL, echo=True)
 

@@ -64,7 +64,7 @@ async def delete_cata(cata_uid: str, session: AsyncSession = Depends(get_session
 
     if cata_to_delete is None:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Update catagory False"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Delete catagory False"
         )
     else:
         return {"message": "Delete Catagory Is Successfully"}

@@ -10,23 +10,12 @@ class CategoryModel(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    class Config:
+        from_attributes = True
+
 
 class CreateCategoryModel(BaseModel):
     name: str
-
-
-class ImageProductModel(BaseModel):
-    uid: uuid.UUID
-    product_uid: Optional[uuid.UUID]
-    main_image: Optional[str] = None
-    image_url: Optional[str] = None
-    created_at: datetime
-    updated_at: datetime
-
-
-class ProductImageCreate(BaseModel):
-    main_image: Optional[str] = None
-    image_url: Optional[str] = None
 
 
 class ProductModel(BaseModel):
@@ -39,10 +28,14 @@ class ProductModel(BaseModel):
     stock: int
     lowstock: int
     spess: Optional[dict] = None
-    category_uid: Optional[uuid.UUID] = None
-    images: Optional[List[ProductImageCreate]] = None
+    # category_uid: Optional[uuid.UUID] = None
+    category: Optional[CategoryModel] = None
+    image_urls: Optional[List[str]] = None
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class ProductCreateModel(BaseModel):
@@ -55,4 +48,17 @@ class ProductCreateModel(BaseModel):
     lowstock: int
     spess: Optional[dict] = None
     category_uid: Optional[uuid.UUID] = None
-    images: Optional[List[ImageProductModel]] = None
+    image_urls: Optional[List[str]] = None
+
+
+class ProductUpdateModel(BaseModel):
+    name: Optional[str] = None
+    code: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    min_price: Optional[float] = None
+    stock: Optional[int] = None
+    lowstock: Optional[int] = None
+    spess: Optional[dict] = None
+    category_uid: Optional[uuid.UUID] = None
+    image_urls: Optional[List[str]] = None

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from .db.main import init_db
 from contextlib import asynccontextmanager
 from src.Products.routes_catagory import cata_router
+from src.Products.routes_product import product_router
 
 
 @asynccontextmanager
@@ -18,4 +19,5 @@ version = "v1"
 app = FastAPI(lifespan=lifespan)
 
 
-app.include_router(cata_router, prefix=f"/api/{version}/cata", tags=["categories"])
+app.include_router(cata_router, prefix=f"/api/{version}/catagory", tags=["Categories"])
+app.include_router(product_router, prefix=f"/api/{version}/product", tags=["Product"])

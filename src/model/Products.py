@@ -26,6 +26,9 @@ class Product(SQLModel, table=True):
     category_uid: Optional[uuid.UUID] = Field(
         default=None, foreign_key="product_categories.uid"
     )
+    image_urls: Optional[List[str]] = Field(
+        default=None, sa_column=Column(pg.JSON, nullable=True)
+    )
 
     created_at: datetime = Field(
         sa_column=Column(pg.TIMESTAMP(timezone=True), default=datetime.now)
@@ -35,10 +38,8 @@ class Product(SQLModel, table=True):
     )
 
     # Relationship
-    category: Optional["ProductCategory"] = Relationship(back_populates="products")
-    Images: List["ProductImage"] = Relationship(
-        back_populates="product",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    category: Optional["ProductCategory"] = Relationship(
+        back_populates="products", sa_relationship_kwargs={"lazy": "selectin"}
     )
 
 
@@ -60,25 +61,3 @@ class ProductCategory(SQLModel, table=True):
 
     # Relationship
     products: List["Product"] = Relationship(back_populates="category")
-
-
-class ProductImage(SQLModel, table=True):
-    __tablename__ = "product_images"
-
-    uid: uuid.UUID = Field(
-        default_factory=uuid.uuid4,
-        sa_column=Column(pg.UUID, primary_key=True, unique=True, nullable=False),
-    )
-
-    product_uid: uuid.UUID = Field(nullable=False, foreign_key="products.uid")
-
-    main_image: str = Field(default=None)
-    image_url: str = Field(default=None)
-    created_at: datetime = Field(
-        sa_column=Column(pg.TIMESTAMP(timezone=True), default=datetime.now)
-    )
-    updated_at: datetime = Field(
-        sa_column=Column(pg.TIMESTAMP(timezone=True), default=datetime.now)
-    )
-    # relationship
-    product: Optional["Product"] = Relationship(back_populates="Images")
