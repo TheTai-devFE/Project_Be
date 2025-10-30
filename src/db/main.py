@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 from .config import Config
 from src.model.Products import Product, ProductCategory
+from src.model.User import User
 
 async_engine = create_async_engine(url=Config.DATABASE_URL, echo=True)
 

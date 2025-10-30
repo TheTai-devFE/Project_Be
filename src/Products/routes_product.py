@@ -6,9 +6,11 @@ from fastapi.exceptions import HTTPException
 from .service import ProductService
 from .schema import ProductModel, ProductCreateModel, ProductUpdateModel
 from src.db.main import get_session
+from src.Auth.dependencies import AccessTokenBearer
 
 product_router = APIRouter()
 product_service = ProductService()
+access_token_bearer = AccessTokenBearer()
 
 
 @product_router.post(
@@ -23,7 +25,10 @@ async def create_product(
 
 
 @product_router.get("/", response_model=List[ProductModel])
-async def get_all_products(session: AsyncSession = Depends(get_session)):
+async def get_all_products(
+    session: AsyncSession = Depends(get_session),
+    token_details=Depends(access_token_bearer),
+):
     products = await product_service.get_all_products(session)
     return products
 
