@@ -11,6 +11,7 @@ class UserModel(BaseModel):
     is_verified: bool
     email: str
     hashed_password: str = Field(exclude=True)
+    role: str
     created_at: datetime
     updated_at: datetime
 
@@ -27,10 +28,10 @@ class UserCreateModel(BaseModel):
     model_config = {
         "json_schema_extra": {
             "example": {
-                "username": "User1",
-                "fullname": "User Fullname",
+                "username": "Username",
+                "fullname": "Fullname",
                 "email": "User_1@gmail.com",
-                "password": "strongpassword123",
+                "password": "********",
             }
         }
     }

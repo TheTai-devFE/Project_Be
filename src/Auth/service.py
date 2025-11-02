@@ -32,7 +32,7 @@ class UserService:
     async def create_user(self, user_data: UserCreateModel, session: AsyncSession):
         user_data_dict = user_data.model_dump()
 
-        new_user = User(**user_data_dict)
+        new_user = User(**user_data_dict, role="user")
         new_user.hashed_password = generate_hashed_password(user_data_dict["password"])
 
         session.add(new_user)

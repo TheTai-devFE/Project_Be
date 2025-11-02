@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from .db.main import init_db
+from .db.main import init_db, create_default_admin
 from contextlib import asynccontextmanager
 from src.Products.routes_catagory import cata_router
 from src.Products.routes_product import product_router
@@ -11,6 +11,7 @@ async def lifespan(app: FastAPI):
     # Startup code here
     print("Starting up...")
     await init_db()
+    await create_default_admin()
     yield
     print("Shutting down...")
 

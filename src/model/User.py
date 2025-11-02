@@ -22,6 +22,9 @@ class User(SQLModel, table=True):
     is_verified: bool = Field(default=False)
     email: str = Field(index=True, unique=True, nullable=False)
     hashed_password: str
+    role: str = Field(
+        sa_column=Column(pg.VARCHAR, nullable=False, server_default="user")
+    )
 
     created_at: datetime = Field(
         sa_column=Column(pg.TIMESTAMP(timezone=True), default=datetime.now)

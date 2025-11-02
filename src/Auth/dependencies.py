@@ -1,8 +1,16 @@
+from typing import List
 from fastapi.security import HTTPBearer
-from fastapi import Request, status
+from fastapi import Request, status, Depends
 from fastapi.security.http import HTTPAuthorizationCredentials
 from .uitl import decode_access_token
 from fastapi.exceptions import HTTPException
+from src.db.redis import token_in_blocklist
+from sqlmodel.ext.asyncio.session import AsyncSession
+from src.db.main import get_session
+from .service import UserService
+from src.model.User import User
+
+user_service = UserService()
 
 
 class TokenBearer(HTTPBearer):
@@ -21,6 +29,14 @@ class TokenBearer(HTTPBearer):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid or expired token.",
+            )
+        if await token_in_blocklist(token_data["jti"]):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail={
+                    "error": "This token is invalid or has been revoked",
+                    "resolution": "Please get new token",
+                },
             )
 
         self.verify_token_data(token_data)
@@ -53,3 +69,47 @@ class RefreshTokenBearer(TokenBearer):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid access token.",
             )
+
+
+async def get_current_user(
+    token_details: dict = Depends(AccessTokenBearer()),
+    session: AsyncSession = Depends(get_session),
+):
+    user_data = token_details["user"]
+
+    if user_data["login_method"] == "email":
+        user_identifier = user_data["email"]
+    else:
+        user_identifier = user_data["username"]
+
+    user = await user_service.get_user_by_email_or_username(user_identifier, session)
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+    return user
+
+
+""""Get current user with uid"""
+# async def get_current_user(
+#     token_details: dict = Depends(AccessTokenBearer()),
+#     session: AsyncSession = Depends(get_session),
+# ):
+#     user_data = token_details["user"]
+#     uid = user_data["uid"]
+
+#     user = await user_service.get_user_by_uid(uid, session)
+#     if not user:
+#         raise HTTPException(status_code=401, detail="User not found")
+
+#     return user
+
+
+def require_roles(alowed_roles: List[str]):
+    async def role_checker(current_user: User = Depends(get_current_user)):
+        if current_user.role not in alowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this resource.",
+            )
+        return current_user
+
+    return role_checker
