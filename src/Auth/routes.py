@@ -2,7 +2,13 @@ from fastapi import APIRouter, Depends, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.db.main import get_session
 from .service import UserService
-from .schema import UserCreateModel, UserModel, UserLoginModel
+from .schema import (
+    UserCreateModel,
+    UserModel,
+    UserLoginModel,
+    UserUpdateModel,
+    AdminUpdateModel,
+)
 from .uitl import verify_password, create_access_token
 from fastapi.exceptions import HTTPException
 from fastapi.responses import JSONResponse
@@ -138,4 +144,48 @@ async def logout_user(token_details: dict = Depends(AccessTokenBearer())):
 
 @auth_router.get("/me", response_model=UserModel)
 async def get_current_user(user=Depends(get_current_user)):
+
     return user
+
+
+@auth_router.patch("/profile", response_model=UserModel)
+async def update_own_profile(
+    user_update: UserUpdateModel,
+    current_user=Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    updated_user = await user_service.update_user(current_user, user_update, session)
+    return updated_user
+
+
+@auth_router.patch(
+    "/{user_id}",
+    response_model=UserModel,
+    dependencies=[Depends(require_roles(["admin"]))],
+)
+async def update_user_role(
+    user_id: str,
+    user_update: AdminUpdateModel,
+    current_user=Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+
+    user = await user_service.get_user_by_uid(user_id, session)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    updated_user = await user_service.update_user(user, user_update, session)
+    return updated_user
+
+
+@auth_router.delete("/{user_id}", status_code=status.HTTP_202_ACCEPTED)
+async def delete_user(
+    user_id: str,
+    current_user=Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+):
+    await user_service.delete_user(user_id, session)
+    return JSONResponse(content={"message": "User deleted successfully"})

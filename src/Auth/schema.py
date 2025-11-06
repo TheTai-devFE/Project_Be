@@ -23,7 +23,7 @@ class UserCreateModel(BaseModel):
     username: str
     fullname: Optional[str] = None
     email: str
-    password: str
+    hashed_password: str
 
     model_config = {
         "json_schema_extra": {
@@ -40,3 +40,14 @@ class UserCreateModel(BaseModel):
 class UserLoginModel(BaseModel):
     identifier: str
     password: str
+
+
+class UserUpdateModel(BaseModel):
+    username: Optional[str] = None
+    fullname: Optional[str] = None
+    email: Optional[str] = None
+    hashed_password: Optional[str] = None
+
+
+class AdminUpdateModel(UserUpdateModel):
+    role: Optional[str] = None
